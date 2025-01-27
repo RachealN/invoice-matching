@@ -1,10 +1,20 @@
-FROM python:3.8-alpine
-RUN apk --update add bash nano
-ENV STATIC_URL /static
-ENV STATIC_PATH /racheal/code/invoice-matching/app/static
-# WORKDIR /racheal/code/invoice-matching
+# Build the React front end
+FROM node:16-alpine as build-step
+WORKDIR /app
+ENV PATH /app/node_modules/.bin:$PATH
+COPY ../package.json ../yarn.lock ./
+COPY client/src ./src
+COPY client/public ./public
+RUN yarn install
+RUN yarn build
+
+# Build the API with the client as static files
+FROM python:3.9
+WORKDIR /app
+COPY --from=build-step /app/build /app/static
 COPY ./requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r ./requirements.txt
-WORKDIR /app
+ENV FLASK_ENV production
 COPY . /app
-CMD ["python3", "app.py"]
+EXPOSE 5000
+CMD ["gunicorn", "-b", ":5000", "app:app"]
