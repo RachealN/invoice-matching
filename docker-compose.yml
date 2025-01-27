@@ -1,27 +1,34 @@
 version: "3.8"
 
 services:
-  app:
-    build: .
-    container_name: flask-app
+  api:
+    build:
+      context: .
+      dockerfile: ./app/Dockerfile.api
+    image: invoice-matching-api
+    container_name: flask-api
     ports:
-      - "56733:80"
-    environment:
-      - FLASK_ENV=development
-      - FLASK_APP=app.py
-    volumes:
-      - .:/code
-    depends_on:
-      - db
+      - "5001:5000"
     networks:
-      - invoice-matching_default
+      - invoice-matching
+
+  client:
+    build:
+      context: .
+      dockerfile: ./client/Dockerfile.client
+    image: invoice-matching-client
+    container_name: react-client
+    ports:
+      - "3000:80"
+    networks:
+      - invoice-matching
 
   db:
     image: mysql:8.0
     container_name: mysql-db
     environment:
       MYSQL_ROOT_PASSWORD: secret123
-      MYSQL_DATABASE: invoice-matching
+      MYSQL_DATABASE: invoice_matching
       MYSQL_USER: user
       MYSQL_PASSWORD: secret123
     ports:
@@ -29,10 +36,10 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
-      - invoice-matching_default
+      - invoice-matching
 
 networks:
-  invoice-matching_default: {}
+  invoice-matching: {}
 
 volumes:
   mysql_data:
