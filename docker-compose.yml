@@ -1,0 +1,38 @@
+version: "3.8"
+
+services:
+  app:
+    build: .
+    container_name: flask-app
+    ports:
+      - "56733:80"
+    environment:
+      - FLASK_ENV=development
+      - FLASK_APP=app.py
+    volumes:
+      - .:/code
+    depends_on:
+      - db
+    networks:
+      - invoice-matching_default
+
+  db:
+    image: mysql:8.0
+    container_name: mysql-db
+    environment:
+      MYSQL_ROOT_PASSWORD: secret123
+      MYSQL_DATABASE: invoice-matching
+      MYSQL_USER: user
+      MYSQL_PASSWORD: secret123
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - invoice-matching_default
+
+networks:
+  invoice-matching_default: {}
+
+volumes:
+  mysql_data:
