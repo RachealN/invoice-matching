@@ -1,16 +1,15 @@
 from flask import Flask
 from flask import render_template
 from app import app 
-import mysql.connector
+from flask_sqlalchemy import SQLAlchemy
 app = Flask(__name__, template_folder='app/templates')
 
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://user:secret123@db/invoice-matching'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  
 
-db_config = {
-    'host': 'db',  
-    'user': 'user',
-    'password': 'secret123',
-    'database': 'invoice-matching'
-}
+# Initialize SQLAlchemy
+db = SQLAlchemy(app)
+
 
 @app.route('/')
 def home():
@@ -18,11 +17,7 @@ def home():
 
 
 @app.route('/template')
-def template():
-    conn = mysql.connector.connect(**db_config)
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM invoices;") 
-    data = cursor.fetchall()
+def template(): 
     return render_template('home.html')
 
 if __name__ == '__main__':
