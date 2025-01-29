@@ -11,6 +11,11 @@ services:
       - "5001:5000"
     networks:
       - invoice-matching
+    environment:
+      - FLASK_APP=wsgi.py
+    volumes:
+      - ./app:/app
+    command: flask run --host=0.0.0.0
 
   client:
     build:
@@ -39,7 +44,8 @@ services:
       - invoice-matching
 
 networks:
-  invoice-matching: {}
+  invoice-matching:
+    driver: bridge
 
 volumes:
   mysql_data:
