@@ -1,4 +1,4 @@
-from models.database import db
+from app.app import db
 
 class InvoiceLineItem(db.Model):
     __tablename__ = 'invoice_line_item'

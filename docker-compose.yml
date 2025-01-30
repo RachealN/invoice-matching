@@ -12,10 +12,13 @@ services:
     networks:
       - invoice-matching
     environment:
-      - FLASK_APP=wsgi.py
+      FLASK_APP: wsgi.py
+      FLASK_ENV: development
     volumes:
-      - ./app:/app
-    command: flask run --host=0.0.0.0
+      - .:/app
+    depends_on:
+      - db
+    command: gunicorn -b 0.0.0.0:5000 wsgi:app
 
   client:
     build:

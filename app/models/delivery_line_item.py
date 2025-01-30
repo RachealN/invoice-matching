@@ -1,5 +1,4 @@
-from models.database import db
-
+from app.app import db
 class DeliveryLineItem(db.Model):
     __tablename__ = 'delivery_line_item'
 

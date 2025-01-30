@@ -1,16 +1,22 @@
 from flask import Flask
-from app.config import Config
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+from app.config import Config
 
-app = Flask(__name__)
+db = SQLAlchemy()
+migrate = Migrate()
 
-app.config.from_object(Config)
-db = SQLAlchemy(app)
+def create_app():
+    app = Flask(__name__)
 
+    app.config.from_object(Config)
 
-@app.route('/')
-def hello_world():
-    return 'Hello, World!'
+    db.init_app(app)
+    migrate.init_app(app, db)
 
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    from app.models import invoice, invoice_line_item, delivery, delivery_line_item
+
+    from app.views import bp  
+    app.register_blueprint(bp)
+
+    return app
