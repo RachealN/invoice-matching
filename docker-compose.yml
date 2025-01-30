@@ -11,6 +11,14 @@ services:
       - "5001:5000"
     networks:
       - invoice-matching
+    environment:
+      FLASK_APP: wsgi.py
+      FLASK_ENV: development
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+    command: gunicorn -b 0.0.0.0:5000 wsgi:app
 
   client:
     build:
@@ -39,7 +47,8 @@ services:
       - invoice-matching
 
 networks:
-  invoice-matching: {}
+  invoice-matching:
+    driver: bridge
 
 volumes:
   mysql_data:
