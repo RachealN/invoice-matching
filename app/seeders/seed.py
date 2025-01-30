@@ -15,7 +15,7 @@ def seed_data():
         db.create_all()
 
         if Invoice.query.first():
-            print("⚠️ Database already seeded. Skipping...")
+            print("Database already seeded. Skipping...")
             return
         
         # Create invoices
@@ -86,7 +86,7 @@ def seed_data():
         db.session.add_all([macbook_delivery_line_item, iphone_delivery_line_item])
 
         db.session.commit()
-        print("✅ Database successfully seeded.")
+        print("Database successfully seeded.")
 
 if __name__ == "__main__":
     seed_data()
