@@ -12,3 +12,10 @@ class Invoice(db.Model):
     currency = db.Column(db.String(10), nullable=True)
    
     line_items = db.relationship('InvoiceLineItem', backref='invoice', lazy=True)
+
+    def to_dict(self):
+        return {
+            "customer": self.customer_name,
+            "invoice_number": self.invoice_number,
+            "amount": self.total_amount
+        }
