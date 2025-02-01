@@ -1,4 +1,4 @@
-from app.models.delivery import DeliveryLineItem
+from app.models.delivery_line_item import DeliveryLineItem
 
 class DeliveryRepository:
     @staticmethod

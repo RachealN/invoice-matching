@@ -1,4 +1,4 @@
-from app.models.invoice import InvoiceLineItem
+from app.models.invoice_line_item import InvoiceLineItem
 from app import db
 
 class InvoiceRepository:

@@ -1,14 +1,12 @@
-from app import app 
-from flask import render_template
-from flask import Blueprint
+from flask import Blueprint, render_template
 
-bp = Blueprint("main", __name__)
+
+bp = Blueprint('views', __name__)
 
 @bp.route('/')
 def index():
     return "Hello, World!"
 
-
-@bp.route('/template')
-def template():
+@bp.route('/')
+def home():
     return render_template('home.html')

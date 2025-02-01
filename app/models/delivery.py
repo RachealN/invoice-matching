@@ -1,5 +1,5 @@
 import uuid
-from app.app import db
+from app.extensions import db
 
 class Delivery(db.Model):
     __tablename__ = 'delivery'
