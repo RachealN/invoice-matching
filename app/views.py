@@ -3,9 +3,9 @@ from flask import Blueprint, render_template
 
 bp = Blueprint('views', __name__)
 
-@bp.route('/')
+@bp.route('/test')
 def index():
-    return "Hello, World!"
+    return "Hello, World - Testing!"
 
 @bp.route('/')
 def home():

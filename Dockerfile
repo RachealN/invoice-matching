@@ -19,4 +19,4 @@ ENV FLASK_ENV production
 COPY . /app
 RUN ls -la /app
 EXPOSE 5000
-CMD ["gunicorn", "-b", ":5000", "wsgi:app"]
+CMD ["gunicorn", "-b", ":5001", "wsgi:app"]
