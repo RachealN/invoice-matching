@@ -6,19 +6,20 @@ services:
       context: .
       dockerfile: ./app/Dockerfile.api
     image: invoice-matching-api
-    container_name: flask-api
+    container_name: api
     ports:
-      - "5001:5000"
+      - "5001:5001"
     networks:
       - invoice-matching
     environment:
-      FLASK_APP: wsgi.py
-      FLASK_ENV: development
+      - FLASK_APP=wsgi.py
+      - FLASK_ENV=development
+      - PYTHONPATH=/app
     volumes:
       - .:/app
     depends_on:
       - db
-    command: gunicorn -b 0.0.0.0:5000 wsgi:app
+    command: gunicorn -b 0.0.0.0:5001 wsgi:app
 
   client:
     build:
@@ -30,6 +31,8 @@ services:
       - "3000:80"
     networks:
       - invoice-matching
+    depends_on:
+      - api
 
   db:
     image: mysql:8.0

@@ -1,5 +1,4 @@
-from app.app import db
-
+from app.extensions import db
 class InvoiceLineItem(db.Model):
     __tablename__ = 'invoice_line_item'
 
@@ -15,3 +14,18 @@ class InvoiceLineItem(db.Model):
     subtotal = db.Column(db.Float, nullable=False, default=0.0)
 
     invoice_id = db.Column(db.String(36), db.ForeignKey('invoice.id'), nullable=False)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "invoice_id": self.invoice_id,
+            "line_item_number": self.line_item_number,
+            "delivery_number": self.delivery_number,
+            "title": self.title,
+            "unit": self.unit,
+            "amount": self.amount,
+            "price": self.price,
+            "description": self.description,
+            "subtotal": self.subtotal
+        }
+    
