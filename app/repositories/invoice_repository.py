@@ -21,3 +21,8 @@ class InvoiceRepository:
     def save_invoice_line_items(line_items):
         db.session.bulk_save_objects(line_items)
         db.session.commit()
+
+    @staticmethod
+    def update_invoice(invoice_line_item):
+        db.session.add(invoice_line_item)
+        db.session.commit()

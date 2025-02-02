@@ -4,7 +4,7 @@ from app.models.invoice_line_item import InvoiceLineItem
 from app.models.invoice import Invoice
 from flask import jsonify
 from app.extensions import db
-
+from rapidfuzz import fuzz, process
 
 class InvoiceService:
 
@@ -15,6 +15,10 @@ class InvoiceService:
             return [invoice.to_dict() for invoice in invoices]  
         except Exception as e:
             raise e  
+    @staticmethod
+    def find_best_match(delivery_number, delivery_numbers, threshold=85):
+        best_match = process.extractOne(delivery_number, delivery_numbers, scorer=fuzz.ratio)
+        return best_match[0] if best_match and best_match[1] >= threshold else None
 
     @staticmethod
     def match_invoice_to_delivery(invoice_items, delivery_numbers):
