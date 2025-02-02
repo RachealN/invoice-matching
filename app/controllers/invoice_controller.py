@@ -19,9 +19,16 @@ def create_invoice_with_line_items():
         if 'invoice_items' not in data or 'delivery_numbers' not in data:
             return jsonify({"error": "Invalid request body, 'invoice_items' or 'delivery_numbers' are missing."}), 400
 
+        last_invoice = db.session.query(Invoice).order_by(Invoice.id.desc()).first()
+        if last_invoice:
+            last_number = int(last_invoice.invoice_number.split('-')[1])
+            new_invoice_number = f"INV-{last_number + 1:04d}"
+        else:
+            new_invoice_number = "INV-0001"
+            
         # Create invoice
         new_invoice = Invoice(
-            invoice_number=str(uuid.uuid4()),
+            invoice_number=new_invoice_number,
             invoice_date="2025-01-01",
             customer_name="Customer X",
             total_amount=1000.00,
