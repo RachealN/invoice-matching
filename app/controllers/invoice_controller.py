@@ -1,12 +1,9 @@
-import uuid
 from flask import Blueprint, jsonify, request
-from app.services.invoice_service import MatchingService
-from app.models.invoice_line_item import InvoiceLineItem
-from app.services.invoice_service import MatchingService
+from app.services.invoice_service import InvoiceService
+from app.services.invoice_service import InvoiceService
 from app.repositories.invoice_repository import InvoiceRepository
-from app.models.invoice import Invoice
-from app.models.invoice_line_item import InvoiceLineItem
-from app.extensions import db
+from app.services.delivery_service import DeliveryService
+from app.services.invoice_service import InvoiceService
 
 
 invoice_controller = Blueprint('invoice_controller', __name__)
@@ -15,68 +12,50 @@ invoice_controller = Blueprint('invoice_controller', __name__)
 def create_invoice_with_line_items():
     try:
         data = request.get_json()
+        print("DEBUG: Received JSON payload:", data)
 
-        if 'invoice_items' not in data or 'delivery_numbers' not in data:
-            return jsonify({"error": "Invalid request body, 'invoice_items' or 'delivery_numbers' are missing."}), 400
-
-        last_invoice = db.session.query(Invoice).order_by(Invoice.id.desc()).first()
-        if last_invoice:
-            last_number = int(last_invoice.invoice_number.split('-')[1])
-            new_invoice_number = f"INV-{last_number + 1:04d}"
+        # Validate payload
+        validated = InvoiceService.validate_payload(data)
+        if isinstance(validated, tuple):
+            invoice_items_payload, delivery_numbers = validated
         else:
-            new_invoice_number = "INV-0001"
-            
-        # Create invoice
-        new_invoice = Invoice(
-            invoice_number=new_invoice_number,
-            invoice_date="2025-01-01",
-            customer_name="Customer X",
-            total_amount=1000.00,
-            currency="USD"
-        )
+            return validated  
 
-        InvoiceRepository.save_invoice(new_invoice)
-        db.session.commit() 
+        # Create Invoice
+        new_invoice = InvoiceService.create_invoice()
 
-        # Create line items
-        invoice_items = []
-        for item in data['invoice_items']:
-            line_item = InvoiceLineItem(
-                invoice_id=new_invoice.id, 
-                delivery_number=item['delivery_number'],
-                title=item['title'],
-                unit=item['unit'],
-                amount=item['amount'],
-                price=item['price'],
-                description=item.get('description', None),
-                subtotal=item.get('subtotal', 0.0)
-            )
-            invoice_items.append(line_item)
+        # Create or Verify Deliveries
+        DeliveryService.create_or_verify_deliveries(delivery_numbers)
 
-        # Save the line items
+        # Create Delivery Line Items
+        DeliveryService.create_delivery_line_items(delivery_numbers)
+
+        # Create Invoice Line Items
+        invoice_items = InvoiceService.create_invoice_line_items(invoice_items_payload, new_invoice.id)
+        if isinstance(invoice_items, tuple):  
+            return jsonify(invoice_items), 400 
+
         InvoiceRepository.save_invoice_line_items(invoice_items)
 
-        # Match line items to deliveries
-        matched, unmatched = MatchingService.match_invoice_to_delivery(invoice_items, data['delivery_numbers'])
-
-        matched_items = [item.to_dict() for item in matched]
+        # Match Invoice Line Items with Deliveries
+        matched, unmatched = InvoiceService.match_invoice_to_delivery(invoice_items, delivery_numbers)
 
         return jsonify({
             "message": "Invoice and line items created successfully",
             "matched": len(matched),
             "unmatched": len(unmatched),
-            "matched_items": matched_items 
+            "matched_items": [item.to_dict() for item in matched]
         }), 201
 
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"DEBUG: Error encountered: {e}")
         return jsonify({"error": str(e)}), 500
+    
 
 @invoice_controller.route("/all", methods=["GET"])
 def get_invoices():
     try:
-        invoices = MatchingService.get_all_invoices()
+        invoices = InvoiceService.get_all_invoices()
         return jsonify({"invoices": invoices}), 200
     except Exception as e:
-        print(f"Error fetching invoices: {str(e)}") 
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
