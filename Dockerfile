@@ -2,12 +2,14 @@
 FROM node:16-alpine as build-step
 WORKDIR /app
 ENV PATH /app/node_modules/.bin:$PATH
-COPY ../package.json ../yarn.lock ./
+COPY client/package.json client/yarn.lock ./
 COPY . .
 COPY client/src ./src
 COPY client/public ./public
+COPY client/yarn.lock ./yarn.lock
 RUN yarn install
-RUN yarn build
+COPY client/ ./
+RUN yarn run build
 
 # Build the API with the client as static files
 FROM python:3.9
@@ -18,5 +20,7 @@ RUN pip install --no-cache-dir -r ./requirements.txt
 ENV FLASK_ENV production
 COPY . /app
 RUN ls -la /app
-EXPOSE 5000
-CMD ["gunicorn", "-b", ":5001", "wsgi:app"]
+
+EXPOSE 5001
+
+CMD gunicorn wsgi:app --bind 0.0.0.0:$PORT
