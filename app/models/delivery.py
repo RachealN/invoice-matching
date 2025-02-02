@@ -4,12 +4,10 @@ from app.extensions import db
 class Delivery(db.Model):
     __tablename__ = 'delivery'
 
-    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     delivery_number = db.Column(db.String(255), nullable=False, unique=True)
-    supplier_name = db.Column(db.String(255), nullable=True)  
+    supplier_name = db.Column(db.String(255), nullable=True)
     delivery_date = db.Column(db.Date, nullable=False)  
-
-    line_items = db.relationship('DeliveryLineItem', backref='delivery', lazy=True)
 
     def to_dict(self):
         return {
@@ -17,3 +15,4 @@ class Delivery(db.Model):
             "delivery_number": self.delivery_number,
             "status": self.delivery_date
         }
+

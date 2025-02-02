@@ -1,4 +1,5 @@
 from app.extensions import db
+
 class InvoiceLineItem(db.Model):
     __tablename__ = 'invoice_line_item'
 
@@ -13,19 +14,17 @@ class InvoiceLineItem(db.Model):
     description = db.Column(db.Text, nullable=True)
     subtotal = db.Column(db.Float, nullable=False, default=0.0)
 
-    invoice_id = db.Column(db.String(36), db.ForeignKey('invoice.id'), nullable=False)
+    invoice = db.relationship('Invoice', backref='line_items')
 
     def to_dict(self):
         return {
-            "id": self.id,
-            "invoice_id": self.invoice_id,
-            "line_item_number": self.line_item_number,
-            "delivery_number": self.delivery_number,
-            "title": self.title,
-            "unit": self.unit,
-            "amount": self.amount,
-            "price": self.price,
-            "description": self.description,
-            "subtotal": self.subtotal
+            'id': self.id,
+            'invoice_id': self.invoice_id,
+            'delivery_number': self.delivery_number,
+            'title': self.title,
+            'unit': self.unit,
+            'amount': self.amount,
+            'price': self.price,
+            'description': self.description,
+            'subtotal': self.subtotal
         }
-    
