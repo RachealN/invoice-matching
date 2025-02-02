@@ -1,6 +1,8 @@
+import difflib
 from rapidfuzz import fuzz, process
 from app.repositories.delivery_repository import DeliveryRepository
 from app.repositories.invoice_repository import InvoiceRepository
+from app.models.delivery_line_item import DeliveryLineItem
 
 
 class MatchingService:
@@ -14,38 +16,41 @@ class MatchingService:
             raise e  
 
     @staticmethod
-    def find_best_match(delivery_number, delivery_numbers, threshold=85):
-        best_match = process.extractOne(delivery_number, delivery_numbers, scorer=fuzz.ratio)
-        return best_match[0] if best_match and best_match[1] >= threshold else None
+    def find_best_match(invoice_number, delivery_numbers):
+        # Fuzzy matching using difflib
+        matches = difflib.get_close_matches(invoice_number, delivery_numbers, n=1, cutoff=0.8)
+        return matches[0] if matches else None
 
-    @staticmethod
     def match_invoice_to_delivery(invoice_items, delivery_numbers):
-        matched_invoices = []  
-        unmatched_invoices = [] 
-        
-        for invoice_line in invoice_items:
-            exact_match = delivery_numbers.get(invoice_line.delivery_number)
+        matched_invoices = []
+        unmatched_invoices = []
 
-            if exact_match:
-                invoice_line.delivery_id = exact_match
-                matched_invoices.append(invoice_line)  
+        # Group deliveries by delivery_number
+        grouped_delivery_items = {}
+        for delivery_number, delivery_item in delivery_numbers.items():
+            grouped_delivery_items.setdefault(delivery_number, []).append(delivery_item)
+
+        for invoice_item in invoice_items:
+            delivery_items_for_number = grouped_delivery_items.get(invoice_item.delivery_number)
+
+            if delivery_items_for_number:
+                matched = False
+                for delivery_item in delivery_items_for_number:
+                    # Match by comparing amount, title, unit,delivery_number
+                    if (invoice_item.amount == delivery_item['amount'] and
+                            invoice_item.title.lower() == delivery_item['title'].lower() and
+                            invoice_item.unit.lower() == delivery_item['unit'].lower()):
+                        # Add matched invoice item to matched_invoices
+                        matched_invoices.append(invoice_item)
+                        matched = True
+                        break
+
+                if not matched:
+                    unmatched_invoices.append(invoice_item)
             else:
-                best_match = MatchingService.find_best_match(invoice_line.delivery_number, list(delivery_numbers.keys()))
-                if best_match:
-                    invoice_line.delivery_id = delivery_numbers[best_match]
-                    matched_invoices.append(invoice_line) 
-                else:
-                    unmatched_invoices.append(invoice_line)
+                unmatched_invoices.append(invoice_item)
 
-            InvoiceRepository.update_invoice(invoice_line)
-
-        # Return both matched and unmatched invoices
-        return {
-            "message": "Matching process completed",
-            "matched": len(matched_invoices),
-            "unmatched": len(unmatched_invoices),
-            "matched_invoices": [invoice.to_dict() for invoice in matched_invoices]
-        }
+        return matched_invoices, unmatched_invoices
 
     @staticmethod
     def process_invoice_matching():

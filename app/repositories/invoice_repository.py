@@ -12,6 +12,12 @@ class InvoiceRepository:
         return InvoiceLineItem.query.all()
 
     @staticmethod
-    def update_invoice(invoice_line_item):
-        db.session.add(invoice_line_item)
+    def save_invoice(invoice):
+        db.session.add(invoice)
+        db.session.commit()
+        return invoice
+
+    @staticmethod
+    def save_invoice_line_items(line_items):
+        db.session.bulk_save_objects(line_items)
         db.session.commit()
