@@ -1,0 +1,8 @@
+{
+  "name": "invoice-matching",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:RachealN/invoice-matching.git",
+  "author": "RachealN <rechealmatsikoit@gmail.com>",
+  "license": "MIT"
+}

@@ -22,3 +22,4 @@ cryptography==39.0.1
 sqlalchemy>=2.0.16
 flask-sqlalchemy>=3.1.1
 rapidfuzz
+flask_cors
