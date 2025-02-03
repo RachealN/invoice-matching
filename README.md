@@ -3,6 +3,9 @@
 
 This project is a RESTful API built using Flask and React, designed to match invoice line items with a list of deliveries based on delivery numbers. The application provides a set of endpoints for data reconciliation and includes Docker configuration for seamless setup and deployment.
 
+### 5. NOTE
+I focused primarily on the backend endpoints, the invoice-matching algorithm, and its associated functionality.
+
 ## Setup Instructions
 
 ### Prerequisites
@@ -112,6 +115,21 @@ After running the migrations, you can seed the database with initial data.
 This command should execute a predefined seeding script that inserts sample data into  database.
 The database should be properly structured and populated with sample data for testing.
 
+### 4. Accessing the Application
+
+#### React Client (Frontend)
+Once the containers are up and running, you can access the React frontend at:
+
+```bash
+http://localhost:3000
+```
+
+#### Flask API (Backend)
+
+```bash
+http://localhost:5001
+```
+
 ### 4.Endpoints
 
 Once the containers are running and the migrations have been applied, you can test the following endpoints:
@@ -183,3 +201,13 @@ To run the unit tests for the API endpoints, you can use `pytest`. This can be d
   Environment variables are defined directly in the `docker-compose.yml` file for simplicity. If your project grows or requires additional configurations, consider using a dedicated `.env` file.
 
  You should now be able to set up, run, and evaluate your Invoices Matching Tool locally.
+
+
+ ## Heroku Deployment
+ The application is also deployed on Heroku for easy access and testing. it is accessible at:
+
+   ```bash
+   https://invoice-matching-477d520ebd55.herokuapp.com/
+   ```
+
+
